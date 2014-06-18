@@ -28,8 +28,8 @@
     <div role="main" class="ui-content">
         <ul id='listaNoticias' data-role="listview" data-inset="true">
             <li data-role="list-divider">Friday, October 8, 2010</li>
-            <li><a href="#detalheNoticia?idNoticia=169621" data-transition="slide">
-            <h2>Stephen Weber</h2>
+            <li><a href="#detalheNoticia?idNoticia=169570" data-transition="slide">
+                <h2>Stephen Weber</h2>
 
                 <p><strong>You've been invited to a meeting at Filament Group in Boston, MA</strong></p>
 
@@ -37,8 +37,8 @@
 
                 <p class="ui-li-aside"><strong>6:24</strong>PM</p>
             </a></li>
-            <li><a href="#detalheNoticia?idNoticia=169608" data-transition="slide">
-            <h2>jQuery Team</h2>
+            <li><a href="#detalheNoticia?idNoticia=169569" data-transition="slide">
+                <h2>jQuery Team</h2>
 
                 <p><strong>Boston Conference Planning</strong></p>
 
@@ -48,8 +48,8 @@
                 <p class="ui-li-aside"><strong>9:18</strong>AM</p>
             </a></li>
             <li data-role="list-divider">Thursday, October 7, 2010 <span class="ui-li-count">1</span></li>
-            <li><a href="#detalheNoticia?idNoticia=169610" data-transition="slide">
-            <h2>Avery Walker</h2>
+            <li><a href="#detalheNoticia?idNoticia=169550" data-transition="slide">
+                <h2>Avery Walker</h2>
 
                 <p><strong>Re: Dinner Tonight</strong></p>
 
@@ -94,7 +94,7 @@
         <p>{{datetime}}</p>
     </div>
     <!-- /header -->
-    <div role="main" class="ui-content">
+    <div role="main" data-role="content" class="ui-content">
         {{#imagem}}
         <div class="ui-content">
             <img src="{{imagem}}"/>
@@ -109,6 +109,35 @@
     </div>
     <div data-role="footer">
         <h4>O quê por no footer?</h4>
+    </div>
+</div>
+
+<div data-role="page" id="templateIndice">
+    <div data-role="header">
+        <h1>Últimas Notícias</h1>
+    </div>
+    <!-- /header -->
+
+    <!--//TODO: Mostrar a última vez que a página foi atualizada. -->
+    <div role="main" data-role="content" class="ui-content">
+        <ul data-role="listview" data-inset="true">
+            <!--<li data-role="list-divider">Friday, October 8, 2010</li>-->
+
+            {{#noticias}}
+            <li><a href="#detalheNoticia?idNoticia={{idNoticia}}" data-transition="slide">
+                <h2>{{titulo}}</h2>
+
+                <p class="ui-li-aside"><strong>{{data}}</strong></p>
+
+                <p>{{secao}}</p>
+            </a></li>
+            {{/noticias}}
+        </ul>
+    </div>
+    <!-- /content -->
+
+    <div data-role="footer">
+        <h4>Page Footer</h4>
     </div>
 </div>
 <!-- /page -->
