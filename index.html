@@ -1,0 +1,109 @@
+<!doctype html>
+<html>
+<head>
+    <title>My Page</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="js/vendor/jquery.mobile-1.4.2/jquery.mobile-1.4.2.css">
+
+    <script src="bower_components/jquery/dist/jquery.min.js"></script>
+
+    <script src="js/vendor/jquery.mobile-1.4.2/jquery.mobile-1.4.2.min.js"></script>
+    <script src="bower_components/mustache/mustache.js"></script>
+    <script src="bower_components/simpleStorage/simpleStorage.js"></script>
+
+    <script src="//d7xe6yl2ckrgs.cloudfront.net/js/4/importio.js"></script>
+
+    <script src="js/main.js"></script>
+</head>
+<body>
+
+<!-- Start of first page -->
+<div data-role="page" id="ultimas">
+
+    <div data-role="header">
+        <h1>Últimas Notícias</h1>
+    </div>
+    <!-- /header -->
+    <div role="main" class="ui-content">
+        <ul id='listaNoticias' data-role="listview" data-inset="true">
+            <li data-role="list-divider">Friday, October 8, 2010</li>
+            <li><a href="#detalheNoticia?idNoticia=169570" data-transition="slide">
+                <h2>Stephen Weber</h2>
+
+                <p><strong>You've been invited to a meeting at Filament Group in Boston, MA</strong></p>
+
+                <p>Hey Stephen, if you're available at 10am tomorrow, we've got a meeting with the jQuery team.</p>
+
+                <p class="ui-li-aside"><strong>6:24</strong>PM</p>
+            </a></li>
+            <li><a href="#detalheNoticia?idNoticia=169569" data-transition="slide">
+                <h2>jQuery Team</h2>
+
+                <p><strong>Boston Conference Planning</strong></p>
+
+                <p>In preparation for the upcoming conference in Boston, we need to start gathering a list of sponsors
+                    and speakers.</p>
+
+                <p class="ui-li-aside"><strong>9:18</strong>AM</p>
+            </a></li>
+            <li data-role="list-divider">Thursday, October 7, 2010 <span class="ui-li-count">1</span></li>
+            <li><a href="#detalheNoticia?idNoticia=169550" data-transition="slide">
+                <h2>Avery Walker</h2>
+
+                <p><strong>Re: Dinner Tonight</strong></p>
+
+                <p>Sure, let's plan on meeting at Highland Kitchen at 8:00 tonight. Can't wait!</p>
+
+                <p class="ui-li-aside"><strong>4:48</strong>PM</p>
+            </a></li>
+            <li><a href="#template" data-transition="slide">
+                <h2>TESTE DE FORMATAÇÃO</h2>
+
+                <p><strong>TETE DE FORMATAÇÃO</strong></p>
+
+                <p>BLAH, BLAH, BLAH</p>
+
+                <p class="ui-li-aside"><strong>4:48</strong>PM</p>
+            </a></li>
+        </ul>
+    </div>
+    <!-- /content -->
+
+    <div data-role="footer">
+        <h4>Page Footer</h4>
+    </div>
+    <!-- /footer -->
+</div>
+<!-- /page -->
+
+<!-- Página com o conteúdo da notícia. -->
+<div data-role="page" id="detalheNoticia">
+
+    <!--<div data-role="header">-->
+    <!--</div>-->
+    <!--<div role="main" class="ui-content">-->
+    <!--</div>-->
+
+</div>
+
+<div data-role="page" id="template">
+    <div data-role="header">
+        <h1>{{titulo}}</h1>
+
+        <p>{{datetime}}</p>
+    </div>
+    <!-- /header -->
+    <div role="main" class="ui-content">
+        {{#texto}}
+        <p>{{.}}</p>
+        {{/texto}}
+    </div>
+    <div data-role="footer">
+        <h4>O quê por no footer?</h4>
+    </div>
+</div>
+<!-- /page -->
+</body>
+
+</html>

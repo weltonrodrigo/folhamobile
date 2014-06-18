@@ -1,0 +1,18 @@
+{
+    "name": "FolhaMobile",
+    "version": "0.0.1",
+    "authors": [
+        "Welton Rodrigo <rodrigo@familianascimento.org>"
+    ],
+    "description": "Uma interface de celulara para o site da Folha de Boa Vista.",
+    "main": "main.js",
+    "license": "MIT",
+    "private": true,
+    "ignore": [
+        "**/.*",
+        "node_modules",
+        "bower_components",
+        "test",
+        "tests"
+    ]
+}
