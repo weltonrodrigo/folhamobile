@@ -94,13 +94,42 @@
         <p>{{datetime}}</p>
     </div>
     <!-- /header -->
-    <div role="main" class="ui-content">
-        {{#texto}}
+    <div role="main" data-role="content" class="ui-content">
+    {{#texto}}
         <p>{{.}}</p>
         {{/texto}}
     </div>
     <div data-role="footer">
         <h4>O quê por no footer?</h4>
+    </div>
+</div>
+
+<div data-role="page" id="templateIndice">
+    <div data-role="header">
+        <h1>Últimas Notícias</h1>
+    </div>
+    <!-- /header -->
+
+    <!--//TODO: Mostrar a última vez que a página foi atualizada. -->
+    <div role="main" data-role="content" class="ui-content">
+        <ul data-role="listview" data-inset="true">
+            <!--<li data-role="list-divider">Friday, October 8, 2010</li>-->
+
+            {{#noticias}}
+            <li><a href="#detalheNoticia?idNoticia={{idNoticia}}" data-transition="slide">
+                <h2>{{titulo}}</h2>
+
+                <p class="ui-li-aside"><strong>{{data}}</strong></p>
+
+                <p>{{secao}}</p>
+            </a></li>
+            {{/noticias}}
+        </ul>
+    </div>
+    <!-- /content -->
+
+    <div data-role="footer">
+        <h4>Page Footer</h4>
     </div>
 </div>
 <!-- /page -->
