@@ -8,13 +8,15 @@ window.onload = function () {
     Mustache.parse(template);
     Mustache.parse(templateIndice);
 
-    template = undef;
-    templateIndice = undef;
+    template = undefined;
+    templateIndice = undefined;
 };
 
 var QueryDelegator = {
 
     importio: importio,
+
+    initialized: false,
 
     init: function () {
         this.importio.init({
@@ -24,6 +26,7 @@ var QueryDelegator = {
             },
             "host": "import.io"
         });
+        this.initialized = true;
     },
     setCache: function (key, data, options) {
         try {
@@ -45,6 +48,8 @@ var QueryDelegator = {
     //TODO: INVALIDAR O CACHE SE O USUÁRIO QUISER FAZER UM RELOAD.
     //invalidateKey
     queryNoticia: function (query, onDataCallBack) {
+
+
         var url = 'http://www.folhabv.com.br/noticia.php?id=' + query;
 
         var data = this.getCache(url);
@@ -55,16 +60,30 @@ var QueryDelegator = {
         };
 
         if (data) {
+            console.log("Got from cache");
             onDataCallBack(data);
         } else {
+            if (!this.initialized) {
+                this.init()
+            }
+            ;
+            console.log("Will get online");
             importio.query({
                     "connectorGuids": ["bd1ecb86-72ad-42b6-90ea-d2e152ef1dcc"],
                     "input": {"webpage/url": url}},
                 { "data": onQueryResponse });
+            window.alert("Tive que refazer a query;");
         }
 
     },
     queryIndice: function (query, onDataCallBack) {
+
+        console.log("Querying indice");
+
+        if (!this.initialized) {
+            this.init()
+        }
+        ;
         var url = 'http://www.folhabv.com.br/ultimas.php?pageNum_Ultimas=' + query;
 
         var data = this.getCache(url);
@@ -75,8 +94,14 @@ var QueryDelegator = {
         };
 
         if (data) {
+            console.log("Got from cache");
             onDataCallBack(data);
         } else {
+            console.log("Will get online");
+            if (!this.initialized) {
+                this.init();
+            }
+            ;
             importio.query({
                     "connectorGuids": ["0bb63053-a009-4fbe-9a89-6d771c7eeabf"],
                     "input": {"webpage/url": url}},
@@ -122,6 +147,7 @@ function formataIndice(indice) {
             noticias: []
         };
 
+        console.log('Formatando indice');
         indice.forEach(function (noticia) {
             var temp = {};
             temp['titulo'] = noticia['data']['titulo/_text'];
@@ -171,8 +197,6 @@ function showNoticia(urlObj, options) {
         console.log(["Data received: " + Date.now(), data]);
 
         var rendered = formataNoticia(data[0].data);
-
-        console.log(rendered);
 
         $(pageSelector).html(rendered);
 
@@ -282,8 +306,6 @@ function showIndice(indiceObj, options) {
 
         var rendered = formataIndice(data);
 
-        console.log(rendered);
-
         $page.html(rendered);
 
         // Pages are lazily enhanced. We call page() on the page
@@ -316,8 +338,6 @@ function showIndice(indiceObj, options) {
     //TODO: Seria ideal ter um plano B para o caso da rede não completar a requisição.
     QueryDelegator.queryIndice(indice, dataCallBack);
 }
-
-QueryDelegator.init();
 
 var run = 0;
 // Listen for any attempts to call changePage().
