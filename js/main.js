@@ -2,8 +2,14 @@
  * Created by weltonnascimento on 17/06/14.
  */
 window.onload = function () {
+    var template = $("#template").html();
+    var templateIndice = $("#templateIndice").html();
 
+    Mustache.parse(template);
+    Mustache.parse(templateIndice);
 
+    template = undef;
+    templateIndice = undef;
 };
 
 var QueryDelegator = {
@@ -65,7 +71,10 @@ function formataNoticia(noticia) {
         var view = {
             titulo: noticia['titulo'],
             datetime: noticia['datetime/_source'],
-            texto: noticia['texto']
+            texto: noticia['texto'],
+            imagem: noticia['imagem'],
+            credito_foto: noticia['credito_foto'],
+            caption_foto: noticia['caption_imagem']
         };
         var template = $('#template').html();
 
