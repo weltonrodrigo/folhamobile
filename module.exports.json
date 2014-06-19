@@ -1,0 +1,8 @@
+module.exports = {
+    credentials:"aws-credentials.json",
+    bucketName:"mobilef",
+    patterns:[
+        "js/*.js",
+        "index.html"
+    ]
+}
