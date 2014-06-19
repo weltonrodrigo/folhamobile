@@ -8,8 +8,8 @@ window.onload = function () {
     Mustache.parse(template);
     Mustache.parse(templateIndice);
 
-    template = undef;
-    templateIndice = undef;
+    template = undefined;
+    templateIndice = undefined;
 };
 
 var QueryDelegator = {
@@ -77,6 +77,7 @@ var QueryDelegator = {
         if (data) {
             onDataCallBack(data);
         } else {
+            console.log('will query online');
             importio.query({
                     "connectorGuids": ["0bb63053-a009-4fbe-9a89-6d771c7eeabf"],
                     "input": {"webpage/url": url}},
@@ -172,7 +173,7 @@ function showNoticia(urlObj, options) {
 
         var rendered = formataNoticia(data[0].data);
 
-        console.log(rendered);
+//        console.log(rendered);
 
         $(pageSelector).html(rendered);
 
@@ -278,11 +279,11 @@ function showIndice(indiceObj, options) {
 
     //TODO: error handling;
     var dataCallBack = function (data) {
-        console.log(["Data received: " + Date.now(), data]);
+        console.log("Data received: ");// + Date.now(), data]);
 
         var rendered = formataIndice(data);
 
-        console.log(rendered);
+//        console.log(rendered);
 
         $page.html(rendered);
 
@@ -316,8 +317,7 @@ function showIndice(indiceObj, options) {
     //TODO: Seria ideal ter um plano B para o caso da rede não completar a requisição.
     QueryDelegator.queryIndice(indice, dataCallBack);
 }
-
-QueryDelegator.init();
+//QueryDelegator.init();
 
 var run = 0;
 // Listen for any attempts to call changePage().
@@ -348,10 +348,48 @@ $(document).bind("pagebeforechange", function (e, data) {
         }
     } else if (typeof data.toPage === "object" && data.toPage[0] == ultimas[0] && run == 0) { //We are on the first screen
         // We're begin asked to show the first page, the index.
-        showIndice(data.toPage, data.options);
+//        showIndice(data.toPage, data.options);
 
-        e.preventDefault();
+//        e.preventDefault();
 
         run = 1;
     }
 });
+
+var naoRodou = true;
+
+$(document).on('pagebeforecreate', '#ultimas', function () {
+    console.log("pagebeforecreate");
+    $.mobile.loading('show');
+
+    if (naoRodou) {
+        var dataCallBack = function (data) {
+            console.log("Query chegou.");
+            //$('#listaNoticias').hide();
+            $('#listaNoticias').html(formataIndice(data));
+            //$('#listaNoticias').listview('refresh');
+            //$('#listaNoticias').show();
+            $.mobile.loading('hide');
+            console.log("antes do trigger");
+
+//            $.mobile.changePage($("#ultimas"));
+            //        $('#ultimas').page('destroy').page();
+            console.log("depois do trigger");
+        };
+
+        QueryDelegator.queryIndice(0, dataCallBack);
+        naoRodou = false;
+    }
+});
+
+$(document).on('pagecontainershow', '#ultimas', function () {
+    $.mobile.loading('show');
+    console.log("pagecontainershow")
+});
+
+QueryDelegator.init();
+
+$(document).on('mobileinit', function () {
+
+    console.log('mobileinit aqui');
+})

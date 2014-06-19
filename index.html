@@ -8,12 +8,14 @@
 
     <script src="bower_components/jquery/jquery.min.js"></script>
 
-    <script src="bower_components/jquery-mobile-bower/js/jquery.mobile-1.4.2.min.js"></script>
+    <script src="bower_components/jquery-mobile-bower/js/jquery.mobile-1.4.2.js"></script>
     <script src="bower_components/mustache/mustache.js"></script>
     <script src="bower_components/simpleStorage/simpleStorage.js"></script>
 
     <script src="bower_components/client-js/dist/importio.js"></script>
+    <script src="bower_components/jquery-mobile-event-debugger/jquery.mobile.event.debugger.js"></script>
 
+    <script src="js/foo.js"></script>
     <script src="js/main.js"></script>
 </head>
 <body>
@@ -27,45 +29,6 @@
     <!-- /header -->
     <div role="main" class="ui-content">
         <ul id='listaNoticias' data-role="listview" data-inset="true">
-            <li data-role="list-divider">Friday, October 8, 2010</li>
-            <li><a href="#detalheNoticia?idNoticia=169570" data-transition="slide">
-                <h2>Stephen Weber</h2>
-
-                <p><strong>You've been invited to a meeting at Filament Group in Boston, MA</strong></p>
-
-                <p>Hey Stephen, if you're available at 10am tomorrow, we've got a meeting with the jQuery team.</p>
-
-                <p class="ui-li-aside"><strong>6:24</strong>PM</p>
-            </a></li>
-            <li><a href="#detalheNoticia?idNoticia=169569" data-transition="slide">
-                <h2>jQuery Team</h2>
-
-                <p><strong>Boston Conference Planning</strong></p>
-
-                <p>In preparation for the upcoming conference in Boston, we need to start gathering a list of sponsors
-                    and speakers.</p>
-
-                <p class="ui-li-aside"><strong>9:18</strong>AM</p>
-            </a></li>
-            <li data-role="list-divider">Thursday, October 7, 2010 <span class="ui-li-count">1</span></li>
-            <li><a href="#detalheNoticia?idNoticia=169550" data-transition="slide">
-                <h2>Avery Walker</h2>
-
-                <p><strong>Re: Dinner Tonight</strong></p>
-
-                <p>Sure, let's plan on meeting at Highland Kitchen at 8:00 tonight. Can't wait!</p>
-
-                <p class="ui-li-aside"><strong>4:48</strong>PM</p>
-            </a></li>
-            <li><a href="#template" data-transition="slide">
-                <h2>TESTE DE FORMATAÇÃO</h2>
-
-                <p><strong>TETE DE FORMATAÇÃO</strong></p>
-
-                <p>BLAH, BLAH, BLAH</p>
-
-                <p class="ui-li-aside"><strong>4:48</strong>PM</p>
-            </a></li>
         </ul>
     </div>
     <!-- /content -->
@@ -113,32 +76,15 @@
 </script>
 
 <script type="text/html" id="templateIndice">
-    <div data-role="header">
-        <h1>Últimas Notícias</h1>
-    </div>
-    <!-- /header -->
+    {{#noticias}}
+    <li><a href="#detalheNoticia?idNoticia={{idNoticia}}" data-transition="slide">
+        <h2>{{titulo}}</h2>
 
-    <!--//TODO: Mostrar a última vez que a página foi atualizada. -->
-    <div role="main" data-role="content" class="ui-content">
-        <ul data-role="listview" data-inset="true">
-            <!--<li data-role="list-divider">Friday, October 8, 2010</li>-->
+        <p class="ui-li-aside"><strong>{{data}}</strong></p>
 
-            {{#noticias}}
-            <li><a href="#detalheNoticia?idNoticia={{idNoticia}}" data-transition="slide">
-                <h2>{{titulo}}</h2>
-
-                <p class="ui-li-aside"><strong>{{data}}</strong></p>
-
-                <p>{{secao}}</p>
-            </a></li>
-            {{/noticias}}
-        </ul>
-    </div>
-    <!-- /content -->
-
-    <div data-role="footer">
-        <h4>Page Footer</h4>
-    </div>
+        <p>{{secao}}</p>
+    </a></li>
+    {{/noticias}}
 </script>
 <!-- /page -->
 </body>
