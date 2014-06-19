@@ -1,18 +1,23 @@
 {
-    "name": "FolhaMobile",
-    "version": "0.0.1",
-    "authors": [
-        "Welton Rodrigo <rodrigo@familianascimento.org>"
-    ],
-    "description": "Uma interface de celulara para o site da Folha de Boa Vista.",
-    "main": "main.js",
-    "license": "MIT",
-    "private": true,
-    "ignore": [
-        "**/.*",
-        "node_modules",
-        "bower_components",
-        "test",
-        "tests"
-    ]
+  "name": "FolhaMobile",
+  "version": "0.0.1",
+  "authors": [
+    "Welton Rodrigo <rodrigo@familianascimento.org>"
+  ],
+  "description": "Uma interface de celulara para o site da Folha de Boa Vista.",
+  "main": "main.js",
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "simpleStorage": "~0.1.2",
+    "mustache": "~0.8.2",
+    "jquery-mobile": "~1.4.2"
+  }
 }
