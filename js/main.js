@@ -152,60 +152,76 @@ function formataIndice(indice) {
 // the URL passed in. Generate markup for the items in the
 // category, inject it into an embedded page, and then make
 // that page the current active page.
-function showNoticia(urlObj, options) {
-    // Indicate loading;
+function showNoticia(url) {
 
+    // Esta página já foi adicionada ao DOM?
 
-    var idNoticia = urlObj.hash.replace(/.*idNoticia=/, ""),
+    // Estamos sendo chamados a mostar uma página de detalhes de notícia.
+    var idNoticia = url.hash.replace(/.*detalheNoticia-/, "");
 
-    // The pages we use to display our content are already in
-    // the DOM. The id of the page we are going to write our
-    // content into is specified in the hash before the '?'.
-        pageSelector = '#detalheNoticia';
+    var selector = url.hash;
 
-    // The page we are going into;
-    var $page = $(pageSelector);
+    var existingPage = $(selector);
+    if (existingPage.size() === 1) {
 
-    $.mobile.loading('show');
+        // A página já existe, pode-se prosseguir.
+        return;
+    }
 
-    //TODO: error handling;
-    var dataCallBack = function (data) {
-        console.log(["Data received: " + Date.now(), data]);
+    // A página não existe, é preciso monta-la.
 
-        var rendered = formataNoticia(data[0].data);
+    // Função chamada para montar a página quando a renderização do template
+    // estiver disponível.
+    var applyHTML = function (htmlData) {
+        newPage = $(htmlData);
+        newPage.attr('id', "detalheNoticia-" + idNoticia);
 
-        console.log(rendered);
-
-        $(pageSelector).html(rendered);
-
-        // Pages are lazily enhanced. We call page() on the page
-        // element to make sure it is always enhanced before we
-        // attempt to enhance the listview markup we just injected.
-        // Subsequent calls to page() are ignored since a page/widget
-        // can only be enhanced once.
-        $page.page();
-
-        // We don't want the data-url of the page we just modified
-        // to be the url that shows up in the browser's location field,
-        // so set the dataUrl option to the URL for the category
-        // we just loaded.
-        options.dataUrl = urlObj.href;
-
-        // Show the page;
-        $.mobile.loading('hide');
-        $.mobile.changePage($page, options);
-        // Now call changePage() and tell it to switch to
-        // the page we just modified.
-//        $.mobile.changePage( $page, options );
-
+        $.mobile.pageContainer.append(newPage);
     };
 
-    //Do the actual query for data.
-    console.log('Will query: ' + Date.now());
+    //Verifica se existe uma página de índice já renderizada no localStorage;
+    try {
+        var rendered = simpleStorage.get(url.href);
+    } catch (e) {
+        console.warn('Erro ao obter página renderizada do cache', e);
+    }
 
-    // Handles cache and stuff
-    //TODO: Seria ideal ter um plano B para o caso da rede não completar a requisição.
-    QueryDelegator.queryNoticia(idNoticia, dataCallBack);
+    //Se não existir, obter uma.
+    if (!rendered) {
+
+        // Informa o usuário
+        $.mobile.loading('show');
+
+        // Cria um objeto para saber quando a conexão encerrou.
+        var deferred = $.Deferred();
+
+        // Retorna uma Promise, que pode ser passada a frente para que
+        // as demais tarefas que dependem desses dados sejam chamadas.
+        QueryDelegator.queryNoticia(idNoticia, function (data) {
+
+            // Renderiza o template usando os dados que chegaram do servidor;
+            rendered = formataNoticia(data[0].data);
+
+            // Inclui essa renderização na página.
+            applyHTML(rendered);
+
+            // Salva no cache
+            simpleStorage.set(url.href, rendered, {TTL: 24 * 3600 * 1000}); //24 horas.
+
+            // Retira o loading;
+            $.mobile.loading('hide');
+
+            // O callback encerrou, já podemos permitir que aconteça o que dependia disso.
+            deferred.resolve();
+        });
+
+        return deferred;
+
+    } else {
+
+        // Este caso é quando havia em cache.
+        applyHTML(rendered);
+    }
 
 //    if ( noticia ) {
 //        // Get the page we are going to dump our content into.
@@ -288,9 +304,12 @@ function showIndice() {
         // Informa o usuário
         $.mobile.loading('show');
 
+        // O deferred
+        deferred = $.Deferred();
+
         // Retorna uma Promise, que pode ser passada a frente para que
         // as demais tarefas que dependem desses dados sejam chamadas.
-        return QueryDelegator.queryIndice(0, function (data) {
+        QueryDelegator.queryIndice(0, function (data) {
 
             // Renderiza o template usando os dados que chegaram do servidor;
             rendered = formataIndice(data);
@@ -303,7 +322,12 @@ function showIndice() {
 
             // Retira o loading;
             $.mobile.loading('hide');
+
+            // Prossiga-se
+            deferred.resolve();
         });
+
+        return deferred;
 
     } else {
 
@@ -316,31 +340,78 @@ function showIndice() {
 // Neste caso, lidaremos com a solicitação de uma página de detalhe de notícia
 // Basta verificar se a página já existe no DOM (se já foi montada antes) e, caso
 // negativo, realizar todo o trabalho necessário.
-// A montagem não ocorre duas vezes com o evento pagebeforechange porque somente na
-// primeira chamada ele vem com uma string na URL. Na segunda vem com um objeto, que é
-// a própria página.
+// Esta variável impede que eu atenda duas vezes ao mesmo evento.
+var alreadyDone = false;
 $(document).bind("pagebeforechange", function (e, data) {
 
-    // We only want to handle changePage() calls where the caller is
-    // asking us to load a page by URL.
-    if (typeof data.toPage === "string") {
+    var proceed = function (data) {
+
+        // Salva uma tag na options que nos permite verificar que esta página já foi mexida
+        // por nós.
+        data.options.byUs = true;
+
+        // marca como já dynamicamente alterada esta página.
+        alreadyDone = true;
+
+        // Pede ao container que carregue a página.
+        $.mobile.changePage(data.toPage, data.options);
+    }
+
+    // Neste caso, é a primeira página que é chamada, que corresponde a page #ultimas.
+    if (typeof data.toPage === 'object' && data.toPage[0].id === 'ultimas' && alreadyDone == false) {
+
+        // Evitamos que o JQM cuide do restante do loading desta página.
+        e.preventDefault();
+
+        // Quando a página estiver pronta, proceed.
+        $.when(showIndice()).then(function () {
+
+            // Depois que a página estiver montada, deixa o JQM fazer a mágica de embelezá-la
+            data.toPage.enhanceWithin();
+
+            proceed(data);
+        });
+
+    } else if (typeof data.toPage === "string") {
+
+        // Neste caso, já estamos sendo chamados por uma string, que é o caso de passar para os detalhes de uma notícia
+        // ou quando voltamos de uma notícia para a página principal.
+
+
+        // Make sure to tell changePage() we've handled this call so it doesn't
+        // have to do anything.
+        e.preventDefault();
 
         // We are being asked to load a page by URL, but we only
         // want to handle URLs that request the data for a specific
         // category.
-        var u = $.mobile.path.parseUrl(data.toPage),
-            re = /^#detalheNoticia/;
+        var url = $.mobile.path.parseUrl(data.toPage);
 
-        if (u.hash.search(re) !== -1) {
+        var det = /^#detalheNoticia/;
+        var idx = /ˆ#ultimas/;
 
-            // We're being asked to display the items for a specific category.
-            // Call our internal method that builds the content for the category
-            // on the fly based on our in-memory category data structure.
-            showNoticia(u, data.options);
+        if (url.hash.search(det) !== -1) {
 
-            // Make sure to tell changePage() we've handled this call so it doesn't
-            // have to do anything.
-            e.preventDefault();
+            // Quando a página de notícias tiver sido montada
+            $.when(showNoticia(url)).then(function () {
+
+                // Embeleza a página da notícia, que já está no DOM
+                $(url.hash).enhanceWithin();
+                data.toPage = $(url.hash);
+
+                //$(data.toPage.)
+                proceed(data);
+            })
+        } else if (url.hash.search(idx) !== -1) {
+
+            // Quando a página estiver pronta, proceed.
+            $.when(showIndice()).then(function () {
+
+                // Depois que a página estiver montada, deixa o JQM fazer a mágica de embelezá-la
+                $('#ultima').enhanceWithin();
+
+                proceed(data);
+            });
         }
     }
 });
@@ -361,4 +432,8 @@ $(function () {
         $.mobile.initializePage();
 
     }); //renomear para montarIndice
+});
+
+$(window).on('pagecontainercreate', function () {
+    console.log('pagecontainercreate');
 });

@@ -7,11 +7,7 @@
     <link rel="stylesheet" href="bower_components/jquery-mobile-bower/css/jquery.mobile-1.4.2.min.css">
 
     <script src="bower_components/jquery/jquery.js"></script>
-    <script>
-        $(document).bind("mobileinit", function () {
-            $.mobile.autoInitializePage = false;
-        });
-    </script>
+
     <script src="bower_components/jquery-mobile-bower/js/jquery.mobile-1.4.2.js"></script>
 
     <script src="bower_components/mustache/mustache.js"></script>
@@ -85,16 +81,16 @@
 <!-- /page -->
 
 <!-- Página com o conteúdo da notícia. -->
-<div data-role="page" id="detalheNoticia">
 
-    <!--<div data-role="header">-->
+
+<!--<div data-role="header">-->
     <!--</div>-->
     <!--<div role="main" class="ui-content">-->
     <!--</div>-->
 
-</div>
 
 <script type="text/html" id="template">
+    <div data-role="page" id="detalheNoticia">
     <div data-role="header">
         <h1>{{titulo}}</h1>
 
@@ -117,6 +113,7 @@
     <div data-role="footer">
         <h4>O quê por no footer?</h4>
     </div>
+    </div>
 </script>
 
 <script type="text/html" id="templateIndice">
@@ -131,8 +128,8 @@
             <!--<li data-role="list-divider">Friday, October 8, 2010</li>-->
 
             {{#noticias}}
-            <li><a href="#detalheNoticia?idNoticia={{idNoticia}}" data-transition="slide">
-                <h2>{{titulo}}</h2>
+            <li><a href="#detalheNoticia-{{idNoticia}}" data-transition="slide">
+            <h2>{{titulo}}</h2>
 
                 <p class="ui-li-aside"><strong>{{data}}</strong></p>
 
