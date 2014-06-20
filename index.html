@@ -6,15 +6,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="bower_components/jquery-mobile-bower/css/jquery.mobile-1.4.2.min.css">
 
-    <script src="bower_components/jquery/jquery.min.js"></script>
+    <script src="bower_components/jquery/jquery.js"></script>
+    <script>
+        $(document).bind("mobileinit", function () {
+            $.mobile.autoInitializePage = false;
+        });
+    </script>
+    <script src="bower_components/jquery-mobile-bower/js/jquery.mobile-1.4.2.js"></script>
 
-    <script src="bower_components/jquery-mobile-bower/js/jquery.mobile-1.4.2.min.js"></script>
     <script src="bower_components/mustache/mustache.js"></script>
     <script src="bower_components/simpleStorage/simpleStorage.js"></script>
 
     <script src="bower_components/client-js/dist/importio.js"></script>
 
     <script src="js/main.js"></script>
+
+
 </head>
 <body>
 

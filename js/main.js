@@ -12,6 +12,8 @@ window.onload = function () {
     templateIndice = undef;
 };
 
+
+// TODO: Necessário chegar se existe conexão à internet antes de fazer qualquer coisa.
 var QueryDelegator = {
 
     importio: importio,
@@ -77,7 +79,7 @@ var QueryDelegator = {
         if (data) {
             onDataCallBack(data);
         } else {
-            importio.query({
+            return importio.query({
                     "connectorGuids": ["0bb63053-a009-4fbe-9a89-6d771c7eeabf"],
                     "input": {"webpage/url": url}},
                 { "done": onQueryResponse });
@@ -265,65 +267,59 @@ function showNoticia(urlObj, options) {
 // the URL passed in. Generate markup for the items in the
 // category, inject it into an embedded page, and then make
 // that page the current active page.
-function showIndice(indiceObj, options) {
-    // Indicate loading;
+function showIndice() {
 
-
-    var indice = 0;
-
-    // The page we are going into;
-    var $page = indiceObj;
-
-    $.mobile.loading('show');
-
-    //TODO: error handling;
-    var dataCallBack = function (data) {
-        console.log(["Data received: " + Date.now(), data]);
-
-        var rendered = formataIndice(data);
-
-        console.log(rendered);
-
-        $page.html(rendered);
-
-        // Pages are lazily enhanced. We call page() on the page
-        // element to make sure it is always enhanced before we
-        // attempt to enhance the listview markup we just injected.
-        // Subsequent calls to page() are ignored since a page/widget
-        // can only be enhanced once.
-        $page.page();
-
-        // Enhance the listview we just injected.
-        // Get the content area element for the page.
-        $content = $page.children(":jqmData(role=content)"),
-            $content.find(":jqmData(role=listview)").listview();
-
-        // We don't want the data-url of the page we just modified
-        // to be the url that shows up in the browser's location field,
-        // so set the dataUrl option to the URL for the category
-        // we just loaded.
-        //options.dataUrl = urlObj.href;
-
-        // Show the page;
-        $.mobile.loading('hide');
-        $.mobile.changePage($page, options);
+    // Função chamada para montar a página quando a renderização do template
+    // estiver disponível.
+    var applyHTML = function (htmlData) {
+        $('#ultimas').html(htmlData);
     };
 
-    //Do the actual query for data.
-    console.log('Will query: ' + Date.now());
+    //Verifica se existe uma página de índice já renderizada no localStorage;
+    try {
+        var rendered = simpleStorage.get('paginaPrincipal0');
+    } catch (e) {
+        console.warn('Erro ao obter página renderizada do cache', e);
+    }
 
-    // Handles cache and stuff
-    //TODO: Seria ideal ter um plano B para o caso da rede não completar a requisição.
-    QueryDelegator.queryIndice(indice, dataCallBack);
+    //Se não existir, obter uma.
+    if (!rendered) {
+
+        // Informa o usuário
+        $.mobile.loading('show');
+
+        // Retorna uma Promise, que pode ser passada a frente para que
+        // as demais tarefas que dependem desses dados sejam chamadas.
+        return QueryDelegator.queryIndice(0, function (data) {
+
+            // Renderiza o template usando os dados que chegaram do servidor;
+            rendered = formataIndice(data);
+
+            // Inclui essa renderização na página.
+            applyHTML(rendered);
+
+            // Salva no cache
+            simpleStorage.set('paginaPrincipal0', rendered, {TTL: 15 * 60 * 1000});
+
+            // Retira o loading;
+            $.mobile.loading('hide');
+        });
+
+    } else {
+
+        // Este caso é quando havia em cache.
+        applyHTML(rendered);
+    }
+
 }
 
-QueryDelegator.init();
-
-var run = 0;
-// Listen for any attempts to call changePage().
+// Neste caso, lidaremos com a solicitação de uma página de detalhe de notícia
+// Basta verificar se a página já existe no DOM (se já foi montada antes) e, caso
+// negativo, realizar todo o trabalho necessário.
+// A montagem não ocorre duas vezes com o evento pagebeforechange porque somente na
+// primeira chamada ele vem com uma string na URL. Na segunda vem com um objeto, que é
+// a própria página.
 $(document).bind("pagebeforechange", function (e, data) {
-
-    var ultimas = $('#ultimas');
 
     // We only want to handle changePage() calls where the caller is
     // asking us to load a page by URL.
@@ -346,12 +342,23 @@ $(document).bind("pagebeforechange", function (e, data) {
             // have to do anything.
             e.preventDefault();
         }
-    } else if (typeof data.toPage === "object" && data.toPage[0] == ultimas[0] && run == 0) { //We are on the first screen
-        // We're begin asked to show the first page, the index.
-        showIndice(data.toPage, data.options);
-
-        e.preventDefault();
-
-        run = 1;
     }
+});
+
+// Just finished loading the HTML document. JQM did its stuff, but didn't initialized the first page, because
+// I told so. Here me must populate the first page and append it to DOM. Obviously, we must check the cache for
+// an already rendered template.
+$(function () {
+
+    // Primeiramente, ganhar tempo inicializando o cliente do Import.IO
+    QueryDelegator.init();
+
+    // Criar a página principal (últimas) em primeiro lugar.
+    $.when(showIndice()).then(function () {
+
+        // Agora que existem dados no DOM, deixar o jQueryMobile trabalhar com essa página.
+        //TODO: Será necessário passar o objeto da página ou ele encontra sozinho?
+        $.mobile.initializePage();
+
+    }); //renomear para montarIndice
 });
