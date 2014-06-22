@@ -159,10 +159,16 @@ function showNoticia(urlObj, options) {
     // The pages we use to display our content are already in
     // the DOM. The id of the page we are going to write our
     // content into is specified in the hash before the '?'.
-        pageSelector = '#detalheNoticia';
+        pageSelector = '#noticia-' + idNoticia;
 
     // The page we are going into;
     var $page = $(pageSelector);
+
+    // A página já existe renderizada.
+    if ($page.size() > 0) {
+        $.mobile.changePage($page, options);
+        return;
+    }
 
     $.mobile.loading('show');
 
@@ -174,7 +180,16 @@ function showNoticia(urlObj, options) {
 
         console.log(rendered);
 
-        $(pageSelector).html(rendered);
+        $page = $('<div>', {
+                "id": 'noticia-' + idNoticia,
+                "data-role": "page",
+                "data-url": '#detalheNoticia?idNoticia=' + idNoticia
+            }
+        );
+
+        $page.html(rendered);
+
+        $page.appendTo('body');
 
         // Pages are lazily enhanced. We call page() on the page
         // element to make sure it is always enhanced before we
