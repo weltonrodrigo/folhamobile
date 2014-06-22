@@ -1,3 +1,0 @@
-[submodule "js/vendor/import-io"]
-	path = js/vendor/import-io
-	url = https://github.com/import-io/client-js.git
