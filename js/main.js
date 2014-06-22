@@ -70,7 +70,7 @@ var QueryDelegator = {
         var data = this.getCache(url);
 
         var onQueryResponse = function (data) {
-            QueryDelegator.setCache(url, data, {TTL: 15 * 60 * 60}); // 15 minutos deve ser suficiente.
+            QueryDelegator.setCache(url, data, {TTL: 15 * 60 * 1000}); // 15 minutos deve ser suficiente.
             onDataCallBack(data);
         };
 
@@ -282,9 +282,12 @@ function showIndice(indiceObj, options) {
 
         var rendered = formataIndice(data);
 
-        console.log(rendered);
+        //console.log(rendered);
 
         $page.html(rendered);
+
+        // Mark this to prevent rerender the page on history back events.
+        $('#ultimas').attr('data-alreadyrendered', 'true');
 
         // Pages are lazily enhanced. We call page() on the page
         // element to make sure it is always enhanced before we
@@ -319,11 +322,14 @@ function showIndice(indiceObj, options) {
 
 QueryDelegator.init();
 
-var run = 0;
 // Listen for any attempts to call changePage().
 $(document).bind("pagebeforechange", function (e, data) {
 
-    var ultimas = $('#ultimas');
+    // Is was me that comanded a pageChange that ended triggering this event,
+    // ignore it.
+    if (data.options.byMe == true) {
+        return;
+    }
 
     // We only want to handle changePage() calls where the caller is
     // asking us to load a page by URL.
@@ -337,6 +343,9 @@ $(document).bind("pagebeforechange", function (e, data) {
 
         if (u.hash.search(re) !== -1) {
 
+            // A flag to help us navigate between 'pagebeforechange' events.
+            data.options.byMe = true;
+
             // We're being asked to display the items for a specific category.
             // Call our internal method that builds the content for the category
             // on the fly based on our in-memory category data structure.
@@ -346,12 +355,22 @@ $(document).bind("pagebeforechange", function (e, data) {
             // have to do anything.
             e.preventDefault();
         }
-    } else if (typeof data.toPage === "object" && data.toPage[0] == ultimas[0] && run == 0) { //We are on the first screen
-        // We're begin asked to show the first page, the index.
+    } else if (typeof data.toPage === 'object' && data.toPage[0].id === 'ultimas') {
+
+        console.log("pagebefore caiu na condição que ativa as funções.");
+        // Just skip this if the page is already rendered.
+        if ($('#ultimas').attr('data-alreadyrendered') === 'true') {
+            console.log("Mas já estava renderizado!");
+            return;
+        }
+
+        // Marca esta página como já modificada
+        data.options.byMe = true;
+
         showIndice(data.toPage, data.options);
 
+        // Cancel pagechange in progress.
         e.preventDefault();
 
-        run = 1;
     }
 });
